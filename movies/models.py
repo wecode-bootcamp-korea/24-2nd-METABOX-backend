@@ -3,19 +3,21 @@ from django.db import models
 from core.models import TimeStampModel
 
 class Movie(TimeStampModel):
-    name           = models.CharField(max_length = 45)
+    ko_name        = models.CharField(max_length = 45)
+    en_name        = models.CharField(max_length = 100)
     release_date   = models.DateField()
     close_date     = models.DateField()
     screening_type = models.CharField(max_length = 45)
-    running_time   = models.DateField()
+    running_time   = models.IntegerField()
     age_grade      = models.IntegerField()
-    price          = models.IntegerField()
+    rating         = models.FloatField()
     description    = models.TextField()
     user           = models.ManyToManyField('users.User', through = 'WishMovie')
     genre          = models.ManyToManyField('Genre')
     director       = models.ManyToManyField('Director')
     actor          = models.ManyToManyField('Actor')
     theater        = models.ManyToManyField('Theater', through = 'MovieTheater')
+    total_audience = models.IntegerField()
 
     class Meta:
         db_table = "movies"
