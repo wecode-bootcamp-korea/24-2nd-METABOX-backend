@@ -8,6 +8,10 @@ class Booking(TimeStampModel):
     quantity       = models.IntegerField()
     booking_number = models.CharField(max_length = 64)
     seat_number    = models.CharField(max_length = 8)
-    
+    price          = models.IntegerField()
+    adult          = models.IntegerField()
+    teenager       = models.IntegerField()
+    kid            = models.IntegerField()
+
     class Meta:
         db_table = "bookings"
