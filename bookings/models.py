@@ -6,11 +6,10 @@ class Booking(TimeStampModel):
     movie_theater  = models.ForeignKey('movies.MovieTheater', on_delete = models.CASCADE)
     user           = models.ForeignKey('users.User', on_delete = models.CASCADE)
     booking_number = models.CharField(max_length = 64)
-    seat_number    = models.CharField(max_length = 8)
     price          = models.IntegerField()
-    adult          = models.IntegerField(default = 0)
-    teenager       = models.IntegerField(default = 0)
-    kid            = models.IntegerField(default = 0)
+    adult          = models.IntegerField(null = True)
+    teenager       = models.IntegerField(null = True)
+    kid            = models.IntegerField(null = True)
 
     class Meta:
         db_table = "bookings"
@@ -21,3 +20,4 @@ class SeatNumber(TimeStampModel):
 
     class Meta:
         db_table = 'seatnumbers'
+

@@ -39,7 +39,7 @@ class WishMovie(TimeStampModel):
 class Genre(models.Model):
     name = models.CharField(max_length = 45)
 
-    class Mete:
+    class Meta:
         db_table = 'genres'
 
 class Director(models.Model):
@@ -55,14 +55,14 @@ class Actor(models.Model):
         db_table = 'actors'
 
 class Theater(models.Model):
-    location = models.Model(max_length = 32)
+    location = models.CharField(max_length = 32)
 
     class Meta:
         db_table = 'theaters'
 
 class MovieTheater(TimeStampModel):
-    movie   = models.ForeignKey('Movie', on_delete = models.CASCADE, related_name = 'movie_theaters')
-    theater = models.ForeignKey('Theater', on_delete = models.CASCADE, related_name = 'movie_theaters')
+    movie         = models.ForeignKey('Movie', on_delete = models.CASCADE, related_name = 'movie_theaters')
+    theater       = models.ForeignKey('Theater', on_delete = models.CASCADE, related_name = 'movie_theaters')
     start_time    = models.DateTimeField()
 
     class Meta:
