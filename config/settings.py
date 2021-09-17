@@ -39,7 +39,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
     'corsheaders',
+    'bookings',
+    'core',
+    'movieposts',
+    'movies',
+    'users'
 ]
 
 MIDDLEWARE = [
@@ -127,7 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #REMOVE_APPEND_SLASH_WARNING
 APPEND_SLASH = False
 
-##CORS
+#CORS
 CORS_ORIGIN_ALLOW_ALL=True
 CORS_ALLOW_CREDENTIALS = True
 
@@ -151,3 +157,27 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+#LOGGING
+LOGGING = {
+    'disable_existing_loggers': False,
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+        },
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
+
+#CRONTAB
+CRONJOBS = [
+    ('*/1 * * * *', 'config.cron.DeleteObjects', '>> schedule.log'),
+]

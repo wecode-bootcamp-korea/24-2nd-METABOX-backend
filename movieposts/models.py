@@ -13,7 +13,7 @@ class MoviePost(TimeStampModel):
         db_table = "movieposts"
 
 class LikeButton(TimeStampModel):
-    user      = models.ForeignKey('User', on_delete = models.CASCADE)
+    user      = models.ForeignKey('users.User', on_delete = models.CASCADE)
     moviepost = models.ForeignKey('MoviePost', on_delete = models.CASCADE)
 
     class Meta:
