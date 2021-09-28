@@ -20,4 +20,3 @@ class SeatNumber(TimeStampModel):
 
     class Meta:
         db_table = 'seatnumbers'
-
