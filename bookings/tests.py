@@ -209,12 +209,13 @@ class BookingTest(TestCase):
         booking_view = {
             'movie_id'    : 1,
             'theater_id'  : 1,
+            'start_time'  : '2021-09-18 17:50',
             'price'       : 10000,
             'adult'       : 3,
             'teenager'    : 1,
             'kid'         : 0
         }
-        response = client.post('/bookings?seat-number=A1&seat-number=A2&seat-number=A3&seat-number=A4', json.dumps(booking_view), content_type = 'application/json', **header)
+        response = client.post('/bookings?seat-number=Z1&seat-number=Z2&seat-number=Z3&seat-number=Z4', json.dumps(booking_view), content_type = 'application/json', **header)
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(),{
             'MESSAGE' : 'CREATED'
@@ -227,6 +228,7 @@ class BookingTest(TestCase):
         booking_view = {
             'movie_id'    : 5,
             'theater_id'  : 1,
+            'start_time'  : '2021-09-20 09:00',
             'price'       : 10000,
             'adult'       : 3,
             'teenager'    : 1,
@@ -258,6 +260,7 @@ class BookingTest(TestCase):
         booking_view = {
             'movie_id'    : 'a',
             'theater_id'  : 1,
+            'start_time'  : '2021-09-20 09:00',
             'price'       : 10000,
             'adult'       : 3,
             'teenager'    : 1,
@@ -292,6 +295,7 @@ class BookingTest(TestCase):
         booking_view = {
             'movie_id'    : 1,
             'theater_id'  : 1,
+            'start_time'  : '2021-09-18 17:50',
             'price'       : 10000,
             'adult'       : 3,
             'teenager'    : 1,
@@ -307,7 +311,7 @@ class BookingTest(TestCase):
     def test_bookingview_get_booking_history_success(self):
         client       = Client()
         header       = {'HTTP_Authorization' : self.access_token2}
-        response     = client.get('/bookings', **header)
+        response     = client.get('/bookings/histories', **header)
         self.maxDiff = None
         self.assertEqual(response.json(),{
             'history' : [
@@ -342,7 +346,7 @@ class BookingTest(TestCase):
     def test_bookingview_get_booking_history_fail_booking_histories_does_not_exist(self):
         client   = Client()
         header   = {'HTTP_Authorization' : self.access_token3}
-        response = client.get('/bookings', **header)
+        response = client.get('/bookings/histories', **header)
         self.assertEqual(response.json(),{'MESSAGE' : 'HISTORY DOES NOT EXISTS'})
         self.assertEqual(response.status_code, 400)
     
