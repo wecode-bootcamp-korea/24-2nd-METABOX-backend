@@ -1,6 +1,7 @@
 from django.urls import path
-from bookings.views import BookingView
+from bookings.views import ReserveView, BookingHistoryView
 
 urlpatterns = [
-    path('', BookingView.as_view())
+    path('', ReserveView.as_view()),
+    path('/histories', BookingHistoryView.as_view())
 ]
