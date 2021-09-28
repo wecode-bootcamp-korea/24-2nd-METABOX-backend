@@ -9,8 +9,8 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('movies', '0001_initial'),
-        ('users', '0001_initial'),
+        ('movies', '__first__'),
+        ('users', '__first__'),
     ]
 
     operations = [
@@ -20,18 +20,30 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('quantity', models.IntegerField()),
                 ('booking_number', models.CharField(max_length=64)),
                 ('seat_number', models.CharField(max_length=8)),
                 ('price', models.IntegerField()),
-                ('adult', models.IntegerField()),
-                ('teenager', models.IntegerField()),
-                ('kid', models.IntegerField()),
+                ('adult', models.IntegerField(default=0)),
+                ('teenager', models.IntegerField(default=0)),
+                ('kid', models.IntegerField(default=0)),
                 ('movie_theater', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='movies.movietheater')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.user')),
             ],
             options={
                 'db_table': 'bookings',
+            },
+        ),
+        migrations.CreateModel(
+            name='SeatNumber',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('seat_number', models.CharField(max_length=4, unique=True)),
+                ('booking', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bookings.booking')),
+            ],
+            options={
+                'db_table': 'seatnumbers',
             },
         ),
     ]
