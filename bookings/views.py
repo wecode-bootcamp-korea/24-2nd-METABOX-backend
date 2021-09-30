@@ -15,27 +15,33 @@ from core.utils      import authentication
 from decorators      import query_debugger
 
 class ReserveView(View):
-    @authentication
-    #@query_debugger
     def get(self, request):
         select_date = request.GET.get('date', date.today())
-        
+        movie_id    = request.GET.get('movie-id')
+        theater_id  = request.GET.get('theater-id')
+
         Q_LTE     = Q(release_date__lte = select_date)
         Q_GTE     = Q(close_date__gte = select_date)
+        Q_MOVIE   = Q()
+        Q_THEATER = Q()
+
+        if movie_id:
+            Q_MOVIE &= Q(movie_id = movie_id)
+        
+        if theater_id:
+            Q_THEATER &= Q(theater_id = theater_id)
         
         movie_query_set = Movie.objects.filter(Q_LTE & Q_GTE).prefetch_related(
             Prefetch('images'),
             Prefetch('movie_theaters')
         )
 
-        Q_MOVIE_IS_IN = Q(movie_id__in = movie_query_set.values_list('id', flat = True))
+        movie_filter_query_set   = MovieTheater.objects.filter(Q_MOVIE, Q_THEATER)
         
-        theater_query_set = MovieTheater.objects.select_related('theater').filter(Q_MOVIE_IS_IN)
-
-        if not (movie_query_set and theater_query_set):
+        if not movie_filter_query_set:
             return JsonResponse({'MESSAGE' : 'MOVIE OR THEATER DOES NOT EXISTS'}, status = 400)    
         
-        movie_count_list  = theater_query_set.values_list('theater_id').annotate(count=Count('movie_id'))
+        movie_count_list  = movie_filter_query_set.values_list('theater_id').annotate(count=Count('movie_id'))
 
         theater_id_list = [theater_id[0] for theater_id in movie_count_list]
         theater_list    = Theater.objects.filter(id__in = theater_id_list)
@@ -48,13 +54,21 @@ class ReserveView(View):
                     'movie_age_grade' : movie.age_grade,
                     'release_date'    : movie.release_date,
                     'close_date'      : movie.close_date,
-                    'movie_poster'    : [img.image_url for img in movie.images.all()]
+                    'running_time'    : movie.running_time,
+                    'screening_type'  : movie.screening_type,
+                    'movie_poster'    : movie.images.first().image_url
                 } for movie in movie_query_set],
             'THEATERS' : [
                 {
+                    'theater_id'   : theater_obj.id,
                     'location'     : theater_obj.location,
                     'total_movies' : count[1]
-                } for theater_obj, count in zip(theater_list, movie_count_list)]
+                } for theater_obj, count in zip(theater_list, movie_count_list)],
+            'TIMETABLE' : [
+                {
+                    'start_time' : [theater.start_time.strftime('%H:%M') for theater in movie_filter_query_set],
+                }
+            ]
             }, status = 201)
 
     @authentication
