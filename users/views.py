@@ -71,26 +71,30 @@ class KakaoSignInView(View):
             birthday = response["kakao_account"]["birthday"]
             age_range = response["kakao_account"]["age_range"]
 
-            # age_standard = int(list(age_range.split('~'))[0])
-            # birth_min = int(2021 - (age_standard) + 1)
-            # birth_max = int(2021 - (age_standard+9) + 1)            
+            birth_min = int(list(age_range.split('~'))[0])
+            birth_max = int(list(age_range.split('~'))[1])
             month = birthday[:2]
             day = birthday[2:] 
             
-            #기본값 : 
-            # birth_year = random.randint(birth_min, birth_max)
-            #테스트 : 
-            birth_year = "1993"
+            birth_year = 2021-(random.randrange(birth_min, birth_max+1))
+            print(birth_year)
+            
             birth_day = f'{birth_year}-{month}-{day}'
             
-            user, is_user = User.objects.get_or_create(
-                kakao_id = kakao_id,
-                email = email,
-                name = name,
-                birth_day = birth_day
-            )
-            user = User.objects.get(kakao_id = kakao_id)
-            token = jwt.encode({"id" : user.id, 'exp':datetime.utcnow() + timedelta(days=3)}, SECRET_KEY, algorithm= ALGORITHM)
+            if User.objects.filter(kakao_id=kakao_id).exists():
+                user = User.objects.get(kakao_id = kakao_id)
+                token = jwt.encode({"id" : user.id, 'exp':datetime.utcnow() + timedelta(days=3)}, SECRET_KEY, algorithm= ALGORITHM)
+
+            if not User.objects.filter(kakao_id=kakao_id).exists():
+                User.objects.create(
+                    kakao_id  = kakao_id,
+                    email     = email,
+                    name      = name,
+                    birth_day = birth_day
+                )
+                user = User.objects.get(kakao_id = kakao_id)
+                token = jwt.encode({"id" : user.id, 'exp':datetime.utcnow() + timedelta(days=3)}, SECRET_KEY, algorithm= ALGORITHM)
+            
             return JsonResponse({"MESSASGE" :"로그인 성공!", 'token' : token}, status = 200)
 
         except KeyError:
