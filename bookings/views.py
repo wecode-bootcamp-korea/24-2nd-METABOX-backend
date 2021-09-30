@@ -36,7 +36,7 @@ class ReserveView(View):
             Prefetch('movie_theaters')
         )
 
-        movie_filter_query_set   = MovieTheater.objects.filter(Q_MOVIE, Q_THEATER)
+        movie_filter_query_set   = MovieTheater.objects.filter(Q_MOVIE, Q_THEATER).prefetch_related('movie')
         
         if not movie_filter_query_set:
             return JsonResponse({'MESSAGE' : 'MOVIE OR THEATER DOES NOT EXISTS'}, status = 400)    
@@ -45,6 +45,14 @@ class ReserveView(View):
 
         theater_id_list = [theater_id[0] for theater_id in movie_count_list]
         theater_list    = Theater.objects.filter(id__in = theater_id_list)
+
+        end_table = []
+        for theater in movie_filter_query_set:
+            H, M              = map(int, theater.start_time.strftime('%H:%M').split(':'))
+            start_time_min    = H * 60 + M
+            end_time          = theater.movie.running_time + start_time_min
+            end_hour, end_min = end_time//60, end_time%60
+            end_table.append(str(end_hour) + ':' + str(end_min))
 
         return JsonResponse({
             'MOVIES' : [
@@ -66,13 +74,13 @@ class ReserveView(View):
                 } for theater_obj, count in zip(theater_list, movie_count_list)],
             'TIMETABLE' : [
                 {
-                    'start_time' : [theater.start_time.strftime('%H:%M') for theater in movie_filter_query_set],
+                    'start_time' : [theater.start_time.strftime('%H:%M')  for theater in movie_filter_query_set],
+                    'end_time'   : end_table
                 }
             ]
             }, status = 201)
 
     @authentication
-    #@query_debugger
     def post(self, request):
         try:
             data      = json.loads(request.body)
@@ -135,7 +143,6 @@ class ReserveView(View):
 
 class BookingHistoryView(View):
     @authentication
-    #@query_debugger
     def get(self, request):
         user_id = request.user
 
