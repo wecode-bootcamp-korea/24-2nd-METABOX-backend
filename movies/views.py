@@ -23,7 +23,6 @@ class  MovieView(View):
                 "genre"          : [genre.name for genre in movie.genre.all()],
                 "director"       : [director.name for director in movie.director.all()],
                 "actor"          : [actor.name for actor in movie.actor.all()],
-                "theater"        : [theater.location for theater in movie.theater.all()],
                 "total_audience" : movie.total_audience,
                 "image_url"      : movie.images.first().image_url,
             }
@@ -56,7 +55,7 @@ class MovieListView(View):
             if Movie_name:
                 movies = movies_annotate.filter(ko_name__contains = Movie_name)
 
-            movies = movies[OFFSET:OFFSET+LIMIT]
+            movies = movies[0:OFFSET+LIMIT]
 
             result = [{
                 "ko_name"        : movie.ko_name,                
