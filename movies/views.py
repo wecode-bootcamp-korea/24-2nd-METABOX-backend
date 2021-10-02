@@ -37,7 +37,7 @@ class MovieListView(View):
         try:
             movies_annotate = Movie.objects.annotate(likes=Count("wishmovies"))
             movies          = movies_annotate.order_by("-likes")
-            order_condition = request.GET.get("order-by", "None")
+            order_condition = request.GET.get("orderby", "None")
             OFFSET          = int(request.GET.get("offset", 0))
             LIMIT           = int(request.GET.get("limit", 4))
             Movie_name      = request.GET.get("movie_name")
@@ -55,7 +55,7 @@ class MovieListView(View):
             if Movie_name:
                 movies = movies_annotate.filter(ko_name__contains = Movie_name)
 
-            movies = movies[0:OFFSET+LIMIT]
+            movies = movies[OFFSET:OFFSET+LIMIT]
 
             result = [{
                 "ko_name"        : movie.ko_name,                
