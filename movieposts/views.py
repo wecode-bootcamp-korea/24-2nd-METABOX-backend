@@ -5,15 +5,13 @@ from django.http      import JsonResponse
 from django.views     import View
 from django.db.models import Count
 
-from bookings.models   import Booking
 from movieposts.models import LikeButton, MoviePost
 from movies.models     import Movie
 from core.utils        import authentication
-from decorators        import query_debugger
 
 class MoviePostWriteView(View):
     @authentication
-    def get(self, request):
+    def get(self):
         movies = Movie.objects.order_by('-rating')[:5]
         return JsonResponse({
             'RESULT' : [
@@ -56,20 +54,10 @@ class MoviePostView(View):
     def get(self, request):
         try:
             ordering = request.GET.get("ordering", '-created_at')
-            # page = int(request.GET.get("page", 1))
-            Movie_name      = request.GET.get("movie_name")
 
             OFFSET          = int(request.GET.get("offset", 0))
             LIMIT           = int(request.GET.get("limit", 8))
-            print(OFFSET, LIMIT)
-            movies = MoviePost.objects.order_by(ordering)[OFFSET:OFFSET+LIMIT]
-            print(len(movies))
-            # limit = 8
-            # offset = (page-1) * limit
-
-            # if Movie_name:
-            #     movies = MoviePost.objects.filter(movie_id__ko_name__icontains = Movie_name)#movies_annotate.filter(ko_name__contains = Movie_name)
-
+            movies          = MoviePost.objects.order_by(ordering)[OFFSET:OFFSET+LIMIT]
 
             moviepostings = MoviePost.objects.select_related('user', 'movie')
             total_count   = moviepostings.count()
@@ -86,7 +74,6 @@ class MoviePostView(View):
                 contents = moviepost.content
                 con = contents.split('###')[0]
                 url = contents.split('###')[1]
-
 
                 movie_post_result.append(
                     {
@@ -143,11 +130,9 @@ class LikeButtonView(View):
                 MoviePost.objects.filter(id = moviepost_id).update(like_count = like_cnt - 1)
 
             return JsonResponse({'MESSAGE' : 'DISLIKE', 'False' : False}, status = 201)
-            
 
         except KeyError:
             return JsonResponse({'MESSAGE' : 'KEY ERROR'}, status = 400)
 
         except ValueError:
             return JsonResponse({'MESSAGE' : 'VALUE ERROR'}, status = 400)
-        

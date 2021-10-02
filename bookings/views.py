@@ -10,9 +10,8 @@ from django.core.exceptions import ValidationError
 from django.db.utils        import IntegrityError
 
 from bookings.models import Booking, SeatNumber
-from movies.models   import Movie, MovieTheater, Theater, Image
+from movies.models   import Movie, MovieTheater, Theater
 from core.utils      import authentication
-from decorators      import query_debugger
 
 class ReserveView(View):
     def get(self, request):
