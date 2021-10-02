@@ -27,19 +27,19 @@ class MoviePostView(View):
     def post(self, request):
         try:
             data = json.loads(request.body)
-            user_id     = request.user
-            movie_id    = data['movie_id']
+            user_id  = request.user
+            movie_id = data['movie_id']
             contents = data['contents']
-            img_url = data['image_url']
-            movie_query_set = Movie.objects.filter(id = movie_id).prefetch_related('images')
+            img_url  = data['image_url']
+            movies = Movie.objects.filter(id = movie_id).prefetch_related('images')
 
-            if not movie_query_set.exists():
+            if not movies.exists():
                 return JsonResponse({'MESSAGE' : 'MOVIE DOES NOT EXISTS'}, status = 400)
 
             MoviePost.objects.create(
                 user_id    = user_id,
                 movie_id   = movie_id,
-                content   = contents + '###' + img_url,
+                content    = contents + '###' + img_url,
                 like_count = 0
             )
 
@@ -55,9 +55,9 @@ class MoviePostView(View):
         try:
             ordering = request.GET.get("ordering", '-created_at')
 
-            OFFSET          = int(request.GET.get("offset", 0))
-            LIMIT           = int(request.GET.get("limit", 8))
-            movies          = MoviePost.objects.order_by(ordering)[OFFSET:OFFSET+LIMIT]
+            OFFSET = int(request.GET.get("offset", 0))
+            LIMIT  = int(request.GET.get("limit", 8))
+            movies = MoviePost.objects.order_by(ordering)[OFFSET:OFFSET+LIMIT]
 
             moviepostings = MoviePost.objects.select_related('user', 'movie')
             total_count   = moviepostings.count()
@@ -71,9 +71,9 @@ class MoviePostView(View):
                 user_email = user_email.replace(user_email[at-2:at],'**')
                 user_email = user_email.split('@')[0]
                 like_count = moviepost.like_count
-                contents = moviepost.content
-                con = contents.split('###')[0]
-                url = contents.split('###')[1]
+                contents   = moviepost.content
+                con        = contents.split('###')[0]
+                url        = contents.split('###')[1]
 
                 movie_post_result.append(
                     {
@@ -91,14 +91,14 @@ class MoviePostView(View):
 
             return JsonResponse(
                 {
-                    'total_count': total_count,
-                    'result': movie_post_result,
+                    'total_count'         : total_count,
+                    'result'              : movie_post_result,
                     'movie_posting_count' : [
                         {
-                            'image_url' : Movie.objects.get(id = moviepost['movie_id']).images.first().image_url,     
-                            'movie_id' : moviepost['movie_id'],
+                            'image_url'   : Movie.objects.get(id = moviepost['movie_id']).images.first().image_url,     
+                            'movie_id'    : moviepost['movie_id'],
                             'movie_title' : Movie.objects.get(id = moviepost['movie_id']).ko_name,
-                            'count' : moviepost['count']
+                            'count'       : moviepost['count']
                         }
                     for moviepost in posting_count]
                 }, status = 400)
@@ -113,23 +113,30 @@ class LikeButtonView(View):
     @authentication
     def post(self, request):
         try:
-            user_id  = request.user
-            data     = json.loads(request.body)
+            user_id      = request.user
+            data         = json.loads(request.body)
             moviepost_id = data['moviepost_id']
 
             like_is_true = LikeButton.objects.filter(user_id = user_id, moviepost_id = moviepost_id)
-            like_cnt = MoviePost.objects.get(id = moviepost_id).like_count
+            like_cnt     = MoviePost.objects.get(id = moviepost_id).like_count
 
             if not like_is_true.exists():
-                LikeButton.objects.create(user_id = user_id, moviepost_id = moviepost_id)
-                MoviePost.objects.filter(id = moviepost_id).update(like_count = like_cnt + 1)
-                return JsonResponse({'MESSAGE' : 'LIKE', 'True' : True}, status = 201)
+                LikeButton.objects.create(
+                    user_id      = user_id, 
+                    moviepost_id = moviepost_id
+                )
+
+                MoviePost.objects.filter(
+                    id = moviepost_id
+                ).update(like_count = like_cnt + 1)
+
+                return JsonResponse({'MESSAGE' : 'LIKE', 'TRUE' : True}, status = 201)
 
             like_is_true.delete()
             if like_cnt > 0:
                 MoviePost.objects.filter(id = moviepost_id).update(like_count = like_cnt - 1)
 
-            return JsonResponse({'MESSAGE' : 'DISLIKE', 'False' : False}, status = 201)
+            return JsonResponse({'MESSAGE' : 'DISLIKE', 'FALSE' : False}, status = 201)
 
         except KeyError:
             return JsonResponse({'MESSAGE' : 'KEY ERROR'}, status = 400)
