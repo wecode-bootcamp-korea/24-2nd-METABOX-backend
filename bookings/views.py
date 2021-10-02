@@ -41,9 +41,8 @@ class ReserveView(View):
             return JsonResponse({'MESSAGE' : 'MOVIE OR THEATER DOES NOT EXISTS'}, status = 400)    
         
         movie_count_list  = movie_filter_query_set.values_list('theater_id').annotate(count=Count('movie_id'))
-
-        theater_id_list = [theater_id[0] for theater_id in movie_count_list]
-        theater_list    = Theater.objects.filter(id__in = theater_id_list)
+        theater_id_list   = [theater_id[0] for theater_id in movie_count_list]
+        theater_list      = Theater.objects.filter(id__in = theater_id_list)
 
         end_table = []
         for theater in movie_filter_query_set:

@@ -58,15 +58,15 @@ class MovieListView(View):
 
             movies = movies[0:OFFSET+LIMIT]
 
-            result = [{
-                "ko_name"        : movie.ko_name,                
-                "release_date"   : movie.release_date,
-                "age_grade"      : movie.age_grade,
-                "rating"         : movie.rating,
-                "description"    : movie.description,
-                "like_count"     : movie.likes,
-                "image_url"      : movie.images.first().image_url,
-
+            result = [
+                {
+                    "ko_name"        : movie.ko_name,                
+                    "release_date"   : movie.release_date,
+                    "age_grade"      : movie.age_grade,
+                    "rating"         : movie.rating,
+                    "description"    : movie.description,
+                    "like_count"     : movie.likes,
+                    "image_url"      : movie.images.first().image_url,
             } for movie in movies]
 
             return JsonResponse({"Result" : result, "Total_Count":total_count}, status=200)
