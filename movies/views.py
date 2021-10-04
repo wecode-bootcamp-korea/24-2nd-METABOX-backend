@@ -1,12 +1,12 @@
-from django.http            import JsonResponse
-from django.views           import View
-from django.db.models       import Count
+from django.http import JsonResponse
+from django.views import View
+from django.db.models import Count
 from django.core.exceptions import FieldError
 
 from movies.models import Movie
 
 class  MovieView(View):
-    def get(self, movie_id):
+    def get(self, request, movie_id):
         try:
             movie = Movie.objects.filter(id=movie_id).get()
 
@@ -23,7 +23,6 @@ class  MovieView(View):
                 "genre"          : [genre.name for genre in movie.genre.all()],
                 "director"       : [director.name for director in movie.director.all()],
                 "actor"          : [actor.name for actor in movie.actor.all()],
-                "theater"        : [theater.location for theater in movie.theater.all()],
                 "total_audience" : movie.total_audience,
                 "image_url"      : movie.images.first().image_url,
             }
@@ -38,7 +37,7 @@ class MovieListView(View):
         try:
             movies_annotate = Movie.objects.annotate(likes=Count("wishmovies"))
             movies          = movies_annotate.order_by("-likes")
-            order_condition = request.GET.get("orderby", "None")
+            order_condition = request.GET.get("order-by", "None")
             OFFSET          = int(request.GET.get("offset", 0))
             LIMIT           = int(request.GET.get("limit", 4))
             Movie_name      = request.GET.get("movie_name")
@@ -56,17 +55,17 @@ class MovieListView(View):
             if Movie_name:
                 movies = movies_annotate.filter(ko_name__contains = Movie_name)
 
-            movies = movies[0:OFFSET+LIMIT]
+            movies = movies[OFFSET:OFFSET+LIMIT]
 
-            result = [
-                {
-                    "ko_name"        : movie.ko_name,                
-                    "release_date"   : movie.release_date,
-                    "age_grade"      : movie.age_grade,
-                    "rating"         : movie.rating,
-                    "description"    : movie.description,
-                    "like_count"     : movie.likes,
-                    "image_url"      : movie.images.first().image_url,
+            result = [{
+                "ko_name"        : movie.ko_name,                
+                "release_date"   : movie.release_date,
+                "age_grade"      : movie.age_grade,
+                "rating"         : movie.rating,
+                "description"    : movie.description,
+                "like_count"     : movie.likes,
+                "image_url"      : movie.images.first().image_url,
+
             } for movie in movies]
 
             return JsonResponse({"Result" : result, "Total_Count":total_count}, status=200)
